@@ -53,8 +53,7 @@
         this.composer.addPass(effect);
 
         effect = new THREE.ShaderPass(THREE.HorizontalTiltShiftShader);
-        console.log(effect.uniforms);
-        effect.uniforms.r.value = 0.5;
+        effect.uniforms.r.value = 0.4;
         this.composer.addPass(effect);
 
         effect = new THREE.FilmPass(0.0008, 100, 1000, false);
