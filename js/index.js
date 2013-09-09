@@ -48,11 +48,11 @@
             if (i % 2 === 0) {
                 b *= -1;
             }
-            toruses[i].rotation.z += a;
+            toruses[i].rotation.z = a * 100;
             toruses[i].position.z = 0 + b / 2 * i;
         }
 
-        floor.rotation.z += Math.sin(elapsed / 500000);
+        floor.rotation.z += 0.01;
     }
 
     function addAxes () {
