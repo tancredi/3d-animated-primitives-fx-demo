@@ -6,10 +6,10 @@
 
     var environment,
         controls,
-        origin = new THREE.Vector3(0, 0, 0),
-        dist = 8,
         start = new Date().getTime(),
         lights = [],
+        toruses = [],
+        floor,
         DEBUG = false;
 
     function init () {
@@ -17,9 +17,9 @@
         environment.addStats();
         environment.init();
 
-        environment.camera.position.z = 1.9;
-        environment.camera.position.y = -6;
-        environment.camera.rotation.x = 1.1;
+        environment.camera.position.z = 6;
+        environment.camera.position.y = -8;
+        environment.camera.rotation.x = 0.9;
 
         environment.onUpdate(function () {
             update();
@@ -29,7 +29,7 @@
     function update () {
         var elapsed = start - new Date().getTime(),
             lightsDist = 20,
-            i, deg, rad;
+            i, deg, rad, a, b;
 
         for(i = 0; i < lights.length; i += 1) {
             deg = 360 / lights.length * i;
@@ -38,6 +38,21 @@
             lights[i].position.x = Math.sin(rad + elapsed / 500) * lightsDist;
             lights[i].position.y = Math.cos(rad + elapsed / 500) * lightsDist;
         }
+
+        for(i = 0; i < toruses.length; i += 1) {
+            a = Math.sin(elapsed / 300000);
+            b = Math.cos(elapsed / 1000);
+            if (i % 3 === 0) {
+                a *= -1;
+            }
+            if (i % 2 === 0) {
+                b *= -1;
+            }
+            toruses[i].rotation.z += a;
+            toruses[i].position.z = 0 + b / 2 * i;
+        }
+
+        floor.rotation.z += Math.sin(elapsed / 500000);
     }
 
     function addAxes () {
@@ -56,24 +71,36 @@
             i;
 
         for (i = 0; i < geometry.vertices.length; i += 1) {
-            geometry.vertices[i].z =  - Math.random() * 0.5;
+            geometry.vertices[i].z =  - Math.random() * 0.4;
         }
 
         geometry.computeCentroids();
         geometry.computeFaceNormals();
         geometry.computeVertexNormals();
 
-        compound.position.z = -2;
+        compound.position.z = -5;
+
+        compound.castShadow = true;
+        compound.receiveShadow = true;
 
         environment.scene.add(compound);
+        floor = compound;
     }
 
     function addArena () {
-        var geometry = new THREE.TorusGeometry(3.8, 0.2, 6, 25, 0),
+        var r = 4,
             materials = [ app.materials.fillingMaterialDark, app.materials.wireframeMaterial ],
-            compound = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+            compound, i, geometry;
 
-        environment.scene.add(compound);
+        for (i = 0; i < 8; i += 1) {
+            geometry = new THREE.TorusGeometry(r, 0.2, 6, 25, 0);
+            compound = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+            compound.castShadow = true;
+            compound.receiveShadow = true;
+            environment.scene.add(compound);
+            toruses.push(compound);
+            r -= 0.5;
+        }
     }
 
     function addLights () {
