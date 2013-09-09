@@ -10,7 +10,7 @@
         dist = 8,
         start = new Date().getTime(),
         lights = [],
-        DEBUG = true;
+        DEBUG = false;
 
     function init () {
         environment = new app.Environment($('#stage'));
