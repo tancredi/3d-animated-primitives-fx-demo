@@ -71,7 +71,7 @@
             i;
 
         for (i = 0; i < geometry.vertices.length; i += 1) {
-            geometry.vertices[i].z =  - Math.random() * 0.4;
+            geometry.vertices[i].z =  - Math.random() * 10;
         }
 
         geometry.computeCentroids();
