@@ -87,7 +87,7 @@
         floor = compound;
     }
 
-    function addArena () {
+    function addToruses () {
         var r = 4,
             materials = [ app.materials.fillingMaterialDark, app.materials.wireframeMaterial ],
             compound, i, geometry;
@@ -146,7 +146,7 @@
     init();
 
     addFloor();
-    addArena();
+    addToruses();
     addLights();
     addSunLight();
 
