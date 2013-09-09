@@ -12,11 +12,16 @@
             angle: 60,
             near: 0.1,
             far: 10000
-        };
+        },
+        dpr = 1;
+
+    if (typeof window.devicePixelRatio !== undefined) {
+        dpr = window.devicePixelRatio;
+    }
 
     Environment = function (el, options, cameraOptions) {
-        var cameraConf = $.extend(true, {}, cameraDefaults, cameraOptions);
-        var conf = $.extend(true, {}, defaults, options);
+        var cameraConf = $.extend(true, {}, cameraDefaults, cameraOptions),
+            conf = $.extend(true, {}, defaults, options);
 
         this.el = el;
         this.stage = new app.Stage(this.el);
@@ -24,21 +29,52 @@
         this.renderer = new THREE.WebGLRenderer({ antialias: conf.antialias });
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(cameraConf.angle, this.aspect, cameraConf.near, cameraConf.far);
+        this.materialDepth = new THREE.MeshDepthMaterial();
 
         this.updateCallbacks = [];
     };
 
     Environment.prototype.init = function () {
+        var effect, renderPass, copyPass;
+
+        this.renderer.gammaInput = true;
+        this.renderer.gammaOutput = true;
+
         this.scene.add(this.camera);
         this.stage.setRenderer(this.renderer);
         this.renderer.setSize(this.stage.width, this.stage.height);
+
+        this.composer = new THREE.EffectComposer(this.renderer);
+        this.composer.setSize(this.stage.width * dpr, this.stage.height * dpr);
+
+        renderPass = new THREE.RenderPass(this.scene, this.camera);
+        this.composer.addPass(renderPass);
+
+        copyPass = new THREE.ShaderPass(THREE.CopyShader);
+        copyPass.renderToScreen = true;
+        this.composer.addPass(copyPass);
+
+        effect = new THREE.ShaderPass(THREE.RGBShiftShader);
+        effect.uniforms.amount.value = 0.001;
+        effect.renderToScreen = true;
+        this.composer.addPass(effect);
+
+        effect = new THREE.ShaderPass(THREE.HorizontalTiltShiftShader);
+        console.log(effect.uniforms);
+        effect.uniforms.r.value = 0.7;
+        this.composer.addPass(effect);
+
+        effect = new THREE.FilmPass(0.0008, 100, 1000, false);
+        this.composer.addPass(effect);
+
         this.animate();
     };
 
     Environment.prototype.animate = function () {
         var self = this;
 
-        this.renderer.render(this.scene, this.camera);
+        this.composer.render(this.scene, this.camera);
+
         this.update();
 
         window.requestAnimationFrame(function () {
